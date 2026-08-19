@@ -23,7 +23,7 @@ bold_font = Font(name="Calibri", size=11, bold=True)
 regular_font = Font(name="Calibri", size=11)
 
 # Título do Dashboard
-ws_app["B2"] = "SIMULADOR DE INVESTIMENTOS EM FIIs"
+ws_app["B2"] = "SIMULADOR DE INVESTIMENTOS"
 ws_app["B2"].font = Font(name="Calibri", size=16, bold=True, color="1F4E78")
 
 # 1. Configurações Globais
@@ -44,7 +44,7 @@ for idx, (label, val) in enumerate(configs, start=10):
     ws_app[f"D{idx}"].font = regular_font
     if label == "Rendimento Carteira":
         ws_app[f"D{idx}"].number_format = "0.0%"
-    elif "Salário" in label or "Sugestão" in label:
+    elif label == "Salário" or label == "Sugestão de Investimento (30%)":
         ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
 # 2. Simulador de Investimento Mensal
@@ -56,8 +56,8 @@ sim_inputs = [
     ("Quanto investir por mês ?", 200),
     ("Por Quantos Anos ?", 5),
     ("Taxa de Rendimento mensal ?", "=D11"),
-    ("Patrimônio acumulado ?", "=FV(D17; D16*12; -D15)"),
-    ("Dividendos Mensais ?", "=D18*D11"),
+    ("Patrimônio acumulado ?", "=VF(D17; D16*12; -D15)"),
+    ("Retorno Mensal Estimado ?", "=D18*D11"),
 ]
 
 for idx, (label, val) in enumerate(sim_inputs, start=15):
@@ -65,7 +65,7 @@ for idx, (label, val) in enumerate(sim_inputs, start=15):
     ws_app[f"B{idx}"].font = regular_font
     ws_app[f"D{idx}"] = val
     ws_app[f"D{idx}"].font = regular_font
-    if "por mês" in label or "acumulado" in label or "Dividendos" in label:
+    if "por mês" in label or "acumulado" in label or "Estimado" in label:
         ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
     elif "Taxa" in label:
         ws_app[f"D{idx}"].number_format = "0.00%"
@@ -77,7 +77,7 @@ ws_app["B21"].fill = header_fill
 
 ws_app["B22"] = "Anos"
 ws_app["C22"] = "Patrimônio Acumulado"
-ws_app["D22"] = "Dividendos Mensais"
+ws_app["D22"] = "Retorno Mensal Estimado"
 for col in ["B", "C", "D"]:
     cell = ws_app[f"{col}22"]
     cell.font = accent_font
@@ -87,7 +87,7 @@ anos_lista = [2, 5, 10, 20, 30]
 for idx, anos in enumerate(anos_lista, start=23):
     ws_app[f"B{idx}"] = anos
     ws_app[f"B{idx}"].font = regular_font
-    ws_app[f"C{idx}"] = f"=FV($D$17; B{idx}*12; -$D$15)"
+    ws_app[f"C{idx}"] = f"=VF($D$17; B{idx}*12; -$D$15)"
     ws_app[f"C{idx}"].font = regular_font
     ws_app[f"C{idx}"].number_format = "R$ #,##0.00"
 
@@ -109,7 +109,7 @@ ws_app["C31"] = "=D15"
 ws_app["C31"].font = bold_font
 ws_app["C31"].number_format = "R$ #,##0.00"
 
-headers_alloc = ["TIPO DE FII", "Percentual Sugerido", "Valores (R$)"]
+headers_alloc = ["TIPO DE INVESTIMENTO", "Percentual Sugerido", "Valores (R$)"]
 for i, h in enumerate(headers_alloc, start=2):
     col_letter = get_column_letter(i)
     cell = ws_app[f"{col_letter}33"]
@@ -117,13 +117,20 @@ for i, h in enumerate(headers_alloc, start=2):
     cell.font = accent_font
     cell.fill = accent_fill
 
-fii_types = ["PAPEL", "TIJOLO", "HÍBRIDOS", "FOFs", "DESENVOLVIMENTO", "HOTELARIAS"]
+inv_types = [
+    "RENDA FIXA",
+    "IMOBILIÁRIO",
+    "MULTIMERCADO",
+    "AÇÕES BR",
+    "INTERNACIONAL",
+    "CRIPTOMOEDAS",
+]
 
-for idx, fii in enumerate(fii_types, start=34):
-    ws_app[f"B{idx}"] = fii
+for idx, inv in enumerate(inv_types, start=34):
+    ws_app[f"B{idx}"] = inv
     ws_app[f"B{idx}"].font = regular_font
     ws_app[f"C{idx}"] = (
-        f'=XLOOKUP($C$30 & "-" & B{idx}, Database_Profiles!$A$2:$A$19, Database_Profiles!$D$2:$D$19, 0)'
+        f'=PROCX($C$30 & "-" & B{idx}; Database_Profiles!$A$2:$A$19; Database_Profiles!$D$2:$D$19; 0)'
     )
     ws_app[f"C{idx}"].font = regular_font
     ws_app[f"C{idx}"].number_format = "0.0%"
@@ -132,14 +139,14 @@ for idx, fii in enumerate(fii_types, start=34):
     ws_app[f"D{idx}"].font = regular_font
     ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
-total_row = 34 + len(fii_types)
+total_row = 34 + len(inv_types)
 ws_app[f"B{total_row}"] = "TOTAL"
 ws_app[f"B{total_row}"].font = bold_font
-ws_app[f"C{total_row}"] = f"=SUM(C34:C{total_row-1})"
+ws_app[f"C{total_row}"] = f"=SOMA(C34:C{total_row-1})"
 ws_app[f"C{total_row}"].font = bold_font
 ws_app[f"C{total_row}"].number_format = "0.0%"
 
-ws_app[f"D{total_row}"] = f"=SUM(D34:D{total_row-1})"
+ws_app[f"D{total_row}"] = f"=SOMA(D34:D{total_row-1})"
 ws_app[f"D{total_row}"].font = bold_font
 ws_app[f"D{total_row}"].number_format = "R$ #,##0.00"
 
@@ -150,31 +157,31 @@ ws_app[f"D{total_row}"].number_format = "R$ #,##0.00"
 ws_db = wb.create_sheet(title="Database_Profiles")
 ws_db.views.sheetView[0].showGridLines = True
 
-headers_db = ["CHAVE", "PERFIL", "TIPO DE FII", "%"]
+headers_db = ["CHAVE", "PERFIL", "TIPO DE INVESTIMENTO", "%"]
 for col_idx, h in enumerate(headers_db, start=1):
     cell = ws_db.cell(row=1, column=col_idx, value=h)
     cell.font = header_font
     cell.fill = header_fill
 
 data_db = [
-    ("Conservador-PAPEL", "Conservador", "PAPEL", 0.30),
-    ("Conservador-TIJOLO", "Conservador", "TIJOLO", 0.50),
-    ("Conservador-HÍBRIDOS", "Conservador", "HÍBRIDOS", 0.10),
-    ("Conservador-FOFs", "Conservador", "FOFs", 0.10),
-    ("Conservador-DESENVOLVIMENTO", "Conservador", "DESENVOLVIMENTO", 0.00),
-    ("Conservador-HOTELARIAS", "Conservador", "HOTELARIAS", 0.00),
-    ("Moderado-PAPEL", "Moderado", "PAPEL", 0.32),
-    ("Moderado-TIJOLO", "Moderado", "TIJOLO", 0.35),
-    ("Moderado-HÍBRIDOS", "Moderado", "HÍBRIDOS", 0.08),
-    ("Moderado-FOFs", "Moderado", "FOFs", 0.05),
-    ("Moderado-DESENVOLVIMENTO", "Moderado", "DESENVOLVIMENTO", 0.10),
-    ("Moderado-HOTELARIAS", "Moderado", "HOTELARIAS", 0.10),
-    ("Agressivo-PAPEL", "Agressivo", "PAPEL", 0.50),
-    ("Agressivo-TIJOLO", "Agressivo", "TIJOLO", 0.10),
-    ("Agressivo-HÍBRIDOS", "Agressivo", "HÍBRIDOS", 0.05),
-    ("Agressivo-FOFs", "Agressivo", "FOFs", 0.05),
-    ("Agressivo-DESENVOLVIMENTO", "Agressivo", "DESENVOLVIMENTO", 0.20),
-    ("Agressivo-HOTELARIAS", "Agressivo", "HOTELARIAS", 0.10),
+    ("Conservador-RENDA FIXA", "Conservador", "RENDA FIXA", 0.50),
+    ("Conservador-IMOBILIÁRIO", "Conservador", "IMOBILIÁRIO", 0.30),
+    ("Conservador-MULTIMERCADO", "Conservador", "MULTIMERCADO", 0.10),
+    ("Conservador-AÇÕES BR", "Conservador", "AÇÕES BR", 0.10),
+    ("Conservador-INTERNACIONAL", "Conservador", "INTERNACIONAL", 0.00),
+    ("Conservador-CRIPTOMOEDAS", "Conservador", "CRIPTOMOEDAS", 0.00),
+    ("Moderado-RENDA FIXA", "Moderado", "RENDA FIXA", 0.35),
+    ("Moderado-IMOBILIÁRIO", "Moderado", "IMOBILIÁRIO", 0.32),
+    ("Moderado-MULTIMERCADO", "Moderado", "MULTIMERCADO", 0.08),
+    ("Moderado-AÇÕES BR", "Moderado", "AÇÕES BR", 0.10),
+    ("Moderado-INTERNACIONAL", "Moderado", "INTERNACIONAL", 0.10),
+    ("Moderado-CRIPTOMOEDAS", "Moderado", "CRIPTOMOEDAS", 0.05),
+    ("Agressivo-RENDA FIXA", "Agressivo", "RENDA FIXA", 0.10),
+    ("Agressivo-IMOBILIÁRIO", "Agressivo", "IMOBILIÁRIO", 0.20),
+    ("Agressivo-MULTIMERCADO", "Agressivo", "MULTIMERCADO", 0.05),
+    ("Agressivo-AÇÕES BR", "Agressivo", "AÇÕES BR", 0.35),
+    ("Agressivo-INTERNACIONAL", "Agressivo", "INTERNACIONAL", 0.20),
+    ("Agressivo-CRIPTOMOEDAS", "Agressivo", "CRIPTOMOEDAS", 0.10),
 ]
 
 for row_idx, row_data in enumerate(data_db, start=2):
@@ -184,12 +191,11 @@ for row_idx, row_data in enumerate(data_db, start=2):
         if col_idx == 4:
             cell.number_format = "0.0%"
 
-# Ajustar larguras
 for ws in [ws_app, ws_db]:
     for col in ws.columns:
         max_len = max(len(str(cell.value or "")) for cell in col)
         col_letter = get_column_letter(col[0].column)
         ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
-wb.save("fii_investment_simulator.xlsx")
-print("Planilha gerada com sucesso!")
+wb.save("investment_simulator.xlsx")
+print("Planilha de investimentos gerada com sucesso!")
