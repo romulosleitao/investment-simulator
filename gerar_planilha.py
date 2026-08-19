@@ -21,7 +21,7 @@ regular_font = Font(name="Calibri", size=11)
 ws_app["B2"] = "SIMULADOR DE INVESTIMENTOS"
 ws_app["B2"].font = Font(name="Calibri", size=16, bold=True, color="1F4E78")
 
-# 1. Configurações Globais (Linhas 9 a 12)
+# 1. Configurações Globais
 ws_app["B9"] = "CONFIGURAÇÕES"
 ws_app["B9"].font = header_font
 ws_app["B9"].fill = header_fill
@@ -35,10 +35,10 @@ ws_app["D11"] = 0.006
 ws_app["D11"].number_format = "0.0%"
 
 ws_app["B12"] = "Sugestão de Investimento (30%)"
-ws_app["D12"] = "=D10*0.3"  # Apontando corretamente para D10 (valor do salário)
+ws_app["D12"] = "=D10*0.3"
 ws_app["D12"].number_format = "R$ #,##0.00"
 
-# 2. Simulador de Investimento Mensal (Linhas 14 a 18)
+# 2. Simulador de Investimento Mensal
 ws_app["B14"] = "INVESTIMENTO MENSAL"
 ws_app["B14"].font = header_font
 ws_app["B14"].fill = header_fill
@@ -62,7 +62,7 @@ ws_app["B19"] = "Retorno Mensal Estimado ?"
 ws_app["D19"] = "=D18*D11"
 ws_app["D19"].number_format = "R$ #,##0.00"
 
-# 3. Tabela de Cenários (Linhas 21 a 26)
+# 3. Tabela de Cenários
 ws_app["B21"] = "Cenários (Projeção de Longo Prazo)"
 ws_app["B21"].font = header_font
 ws_app["B21"].fill = header_fill
@@ -78,13 +78,12 @@ for col in ["B", "C", "D"]:
 anos_lista = [2, 5, 10, 20, 30]
 for idx, anos in enumerate(anos_lista, start=23):
     ws_app[f"B{idx}"] = anos
-    ws_app[f"B{idx}"].font = regular_font
     ws_app[f"C{idx}"] = f"=VF($D$17; B{idx}*12; -$D$15)"
     ws_app[f"C{idx}"].number_format = "R$ #,##0.00"
     ws_app[f"D{idx}"] = f"=C{idx}*$D$17"
     ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
-# 4. Alocação de Ativos por Perfil (Linhas 29 a 40)
+# 4. Alocação de Ativos por Perfil (100% Dinâmico via PROCX)
 ws_app["B29"] = "DISTRIBUIÇÃO DE CARTEIRA POR PERFIL"
 ws_app["B29"].font = header_font
 ws_app["B29"].fill = header_fill
@@ -94,7 +93,7 @@ ws_app["C30"] = "Moderado"
 ws_app["C30"].font = bold_font
 
 ws_app["B31"] = "VALOR A SER INVESTIDO POR MÊS"
-ws_app["C31"] = "=D15"  # Puxa os R$ 200,00 da célula D15
+ws_app["C31"] = "=D15"
 ws_app["C31"].font = bold_font
 ws_app["C31"].number_format = "R$ #,##0.00"
 
@@ -117,15 +116,16 @@ inv_types = [
 
 for idx, inv in enumerate(inv_types, start=34):
     ws_app[f"B{idx}"] = inv
-    # PROCX buscando na aba Database_Profiles a chave combinada (ex: Moderado-RENDA FIXA)
+    ws_app[f"B{idx}"].font = regular_font
+
+    # Fórmula pura PROCX: Se mudar o perfil em C30, o Excel busca na aba Database_Profiles automaticamente
     ws_app[f"C{idx}"] = (
         f'=PROCX($C$30 & "-" & B{idx}; Database_Profiles!$A$2:$A$19; Database_Profiles!$D$2:$D$19; 0)'
     )
     ws_app[f"C{idx}"].number_format = "0.0%"
 
-    ws_app[f"D{idx}"] = (
-        f"=C{idx}*$C$31"  # Multiplica a porcentagem pelo valor em C31 (R$ 200)
-    )
+    # Multiplica o percentual buscado pelo valor investido em C31
+    ws_app[f"D{idx}"] = f"=C{idx}*$C$31"
     ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
 total_row = 34 + len(inv_types)
@@ -139,7 +139,7 @@ ws_app[f"D{total_row}"] = f"=SOMA(D34:D{total_row-1})"
 ws_app[f"D{total_row}"].font = bold_font
 ws_app[f"D{total_row}"].number_format = "R$ #,##0.00"
 
-# ABA 2: Database_Profiles
+# ABA 2: Database_Profiles (Matriz de Referência)
 ws_db = wb.create_sheet(title="Database_Profiles")
 ws_db.views.sheetView[0].showGridLines = True
 
@@ -167,7 +167,7 @@ data_db = [
     ("Agressivo-MULTIMERCADO", "Agressivo", "MULTIMERCADO", 0.05),
     ("Agressivo-AÇÕES BR", "Agressivo", "AÇÕES BR", 0.35),
     ("Agressivo-INTERNACIONAL", "Agressivo", "INTERNACIONAL", 0.20),
-    ("Agressivo-CRIPTOMOEDAS", "CRIPTOMOEDAS", "CRIPTOMOEDAS", 0.10),
+    ("Agressivo-CRIPTOMOEDAS", "Agressivo", "CRIPTOMOEDAS", 0.10),
 ]
 
 for row_idx, row_data in enumerate(data_db, start=2):
@@ -184,4 +184,4 @@ for ws in [ws_app, ws_db]:
         ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
 wb.save("investment_simulator.xlsx")
-print("Planilha ajustada e gerada com sucesso!")
+print("Planilha 100% dinâmica gerada com sucesso!")
