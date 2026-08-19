@@ -2,17 +2,13 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-# Criando o workbook
 wb = openpyxl.Workbook()
 
-# -------------------------------------------------------------
-# ABA 1: APP (Dashboard Principal)
-# -------------------------------------------------------------
+# ABA 1: APP
 ws_app = wb.active
 ws_app.title = "APP"
 ws_app.views.sheetView[0].showGridLines = True
 
-# Paleta de Cores e Estilos Corporativos
 header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
 header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
 
@@ -22,7 +18,6 @@ accent_font = Font(name="Calibri", size=11, bold=True, color="000000")
 bold_font = Font(name="Calibri", size=11, bold=True)
 regular_font = Font(name="Calibri", size=11)
 
-# Título do Dashboard
 ws_app["B2"] = "SIMULADOR DE INVESTIMENTOS"
 ws_app["B2"].font = Font(name="Calibri", size=16, bold=True, color="1F4E78")
 
@@ -34,7 +29,7 @@ ws_app["B9"].fill = header_fill
 configs = [
     ("Salário", 2000),
     ("Rendimento Carteira", 0.006),
-    ("Sugestão de Investimento (30%)", "=B10*0.3"),
+    ("Sugestão de Investimento (30%)", "=D10*0.3"),  # Apontando para o valor D10
 ]
 
 for idx, (label, val) in enumerate(configs, start=10):
@@ -150,10 +145,7 @@ ws_app[f"D{total_row}"] = f"=SOMA(D34:D{total_row-1})"
 ws_app[f"D{total_row}"].font = bold_font
 ws_app[f"D{total_row}"].number_format = "R$ #,##0.00"
 
-
-# -------------------------------------------------------------
-# ABA 2: Database_Profiles (Backend de Referência)
-# -------------------------------------------------------------
+# ABA 2: Database_Profiles
 ws_db = wb.create_sheet(title="Database_Profiles")
 ws_db.views.sheetView[0].showGridLines = True
 
@@ -198,4 +190,4 @@ for ws in [ws_app, ws_db]:
         ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
 wb.save("investment_simulator.xlsx")
-print("Planilha de investimentos gerada com sucesso!")
+print("Planilha atualizada e corrigida com sucesso!")
