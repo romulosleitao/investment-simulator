@@ -1,5 +1,6 @@
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.chart import BarChart, LineChart, Reference
 
 
 class DashboardBuilder:
@@ -54,7 +55,7 @@ class DashboardBuilder:
 
         # Taxa de Retorno Média da Carteira (a.m.) em Português
         ws_app["B18"] = "Taxa de Retorno Média da Carteira (a.m.)"
-        ws_app["D18"] = "=SOMAPRODUTO(C24:C29; E24:E29) / 12"
+        ws_app["D18"] = "=SOMARPRODUTO(C24:C29; E24:E29) / 12"
         ws_app["D18"].number_format = "0.00%"
 
         # 3. Alocação de Ativos por Perfil
@@ -143,5 +144,36 @@ class DashboardBuilder:
 
             ws_app[f"E{idx}"] = f"=D{idx}*$D$18"
             ws_app[f"E{idx}"].number_format = "R$ #,##0.00"
+
+        # Gráfico 1: Alocação de Ativos (Barra Vertical)
+        chart_alloc = BarChart()
+        chart_alloc.type = "col"
+        chart_alloc.style = 10
+        chart_alloc.title = "Distribuição da Carteira por Ativo"
+        chart_alloc.y_axis.title = "Aporte Alocado (R$)"
+        chart_alloc.x_axis.title = "Tipo de Investimento"
+
+        data_alloc = Reference(ws_app, min_col=4, min_row=23, max_row=29)
+        cats_alloc = Reference(ws_app, min_col=2, min_row=24, max_row=29)
+        chart_alloc.add_data(data_alloc, titles_from_data=True)
+        chart_alloc.set_categories(cats_alloc)
+        chart_alloc.legend = None
+
+        ws_app.add_chart(chart_alloc, "G23")
+
+        # Gráfico 2: Projeção de Longo Prazo (Linha)
+        chart_proj = LineChart()
+        chart_proj.title = "Projeção de Patrimônio Acumulado (Longo Prazo)"
+        chart_proj.style = 13
+        chart_proj.y_axis.title = "Patrimônio (R$)"
+        chart_proj.x_axis.title = "Anos"
+
+        data_proj = Reference(ws_app, min_col=4, min_row=33, max_row=38)
+        cats_proj = Reference(ws_app, min_col=2, min_row=34, max_row=38)
+        chart_proj.add_data(data_proj, titles_from_data=True)
+        chart_proj.set_categories(cats_proj)
+        chart_proj.legend = None
+
+        ws_app.add_chart(chart_proj, "G38")
 
         return ws_app

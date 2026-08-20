@@ -1,0 +1,12 @@
+# Pastas e ambientes
+.venv/
+__pycache__/
+*.pyc
+
+# Arquivos locais
+.vscode/
+.DS_Store
+
+# Se você quiser que o git ignore os arquivos gerados (para não poluir o repo)
+# investment_simulator.xlsx
+# relatorio_*.pdf
