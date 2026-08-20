@@ -52,9 +52,9 @@ class DashboardBuilder:
         ws_app["D17"].number_format = "R$ #,##0.00"
         ws_app["D17"].font = self.styles.bold_font
 
-        # Taxa de Retorno Média da Carteira (a.m.) em inglês com vírgula
+        # Taxa de Retorno Média da Carteira (a.m.) em Português
         ws_app["B18"] = "Taxa de Retorno Média da Carteira (a.m.)"
-        ws_app["D18"] = "=SUMPRODUCT(C24:C29, E24:E29) / 12"
+        ws_app["D18"] = "=SOMAPRODUTO(C24:C29; E24:E29) / 12"
         ws_app["D18"].number_format = "0.00%"
 
         # 3. Alocação de Ativos por Perfil
@@ -88,11 +88,9 @@ class DashboardBuilder:
             ws_app[f"B{idx}"] = inv
             ws_app[f"B{idx}"].font = self.styles.regular_font
 
-            # XLOOKUP em inglês com vírgulas
+            # PROCV oficial em Português com ponto e vírgula e FALSO
             ws_app[f"C{idx}"] = (
-                '=XLOOKUP($C$16 & "-" & B'
-                + str(idx)
-                + ", Database_Profiles!$A$2:$A$19, Database_Profiles!$D$2:$D$19, 0)"
+                f'=PROCV($C$16 & "-" & B{idx}; Database_Profiles!$A$2:$E$19; 4; FALSO)'
             )
             ws_app[f"C{idx}"].number_format = "0.0%"
 
@@ -100,11 +98,9 @@ class DashboardBuilder:
             ws_app[f"D{idx}"] = f"=C{idx}*$D$17"
             ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
-            # XLOOKUP para Retorno Anual em inglês com vírgulas
+            # PROCV para Retorno Anual em Português
             ws_app[f"E{idx}"] = (
-                '=XLOOKUP($C$16 & "-" & B'
-                + str(idx)
-                + ", Database_Profiles!$A$2:$A$19, Database_Profiles!$E$2:$E$19, 0)"
+                f'=PROCV($C$16 & "-" & B{idx}; Database_Profiles!$A$2:$E$19; 5; FALSO)'
             )
             ws_app[f"E{idx}"].number_format = "0.0%"
 
@@ -112,12 +108,12 @@ class DashboardBuilder:
         ws_app[f"B{total_row}"] = "TOTAL"
         ws_app[f"B{total_row}"].font = self.styles.bold_font
 
-        # SUM em inglês com vírgula
-        ws_app[f"C{total_row}"] = f"=SUM(C24:C{total_row-1})"
+        # SOMA em Português
+        ws_app[f"C{total_row}"] = f"=SOMA(C24:C{total_row-1})"
         ws_app[f"C{total_row}"].font = self.styles.bold_font
         ws_app[f"C{total_row}"].number_format = "0.0%"
 
-        ws_app[f"D{total_row}"] = f"=SUM(D24:D{total_row-1})"
+        ws_app[f"D{total_row}"] = f"=SOMA(D24:D{total_row-1})"
         ws_app[f"D{total_row}"].font = self.styles.bold_font
         ws_app[f"D{total_row}"].number_format = "R$ #,##0.00"
 
@@ -141,8 +137,8 @@ class DashboardBuilder:
             ws_app[f"C{idx}"] = f"=$D$17*{anos}*12"
             ws_app[f"C{idx}"].number_format = "R$ #,##0.00"
 
-            # FV (Future Value) em inglês com vírgulas
-            ws_app[f"D{idx}"] = f"=FV($D$18, B{idx}*12, -$D$17)"
+            # VF (Valor Futuro) em Português com ponto e vírgula
+            ws_app[f"D{idx}"] = f"=VF($D$18; B{idx}*12; -$D$17)"
             ws_app[f"D{idx}"].number_format = "R$ #,##0.00"
 
             ws_app[f"E{idx}"] = f"=D{idx}*$D$18"
