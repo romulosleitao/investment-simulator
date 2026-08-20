@@ -1,47 +1,82 @@
-# 📊 Specification & Business Rules: Investment Simulator (Excel)
+"""
+=============================================================================
+SPECIFICATION (SPEC.PY) - SIMULADOR DE INVESTIMENTOS MULTICLASSE
+=============================================================================
+Este documento define formalmente as regras de negócio, premissas matemáticas,
+fontes de dados e arquitetura de cálculo do simulador financeiro.
+"""
 
-## 1. Objective & Overview
-Create a professional Excel tool to simulate Real Estate Investment Funds (FIIs) portfolios, tracking monthly investments, asset accumulation, projected compound returns, and dividend distributions based on specific investor profiles.
+PROJECT_SPEC = {
+    "name": "Simulador de Investimentos Multiclasse",
+    "version": "2.0.0",
+    "architecture": "Modular (Specification-Driven Development)",
+    
+    # -------------------------------------------------------------------------
+    # 1. PREMISSAS MACROECONÔMICAS E DE ATIVOS (Backend Database)
+    # -------------------------------------------------------------------------
+    "assets_database": {
+        "description": "Define as classes de ativos, pesos por perfil de risco e retornos esperados anuais.",
+        "assets": [
+            {"tipo": "RENDA FIXA", "retorno_aa": 0.10},
+            {"tipo": "IMOBILIÁRIO", "retorno_aa": 0.11},
+            {"tipo": "MULTIMERCADO", "retorno_aa": 0.105},
+            {"tipo": "AÇÕES BR", "retorno_aa": 0.12},
+            {"tipo": "INTERNACIONAL", "retorno_aa": 0.115},
+            {"tipo": "CRIPTOMOEDAS", "retorno_aa": 0.18}
+        ],
+        "profiles": {
+            "Conservador": {"RENDA FIXA": 0.50, "IMOBILIÁRIO": 0.30, "MULTIMERCADO": 0.10, "AÇÕES BR": 0.10, "INTERNACIONAL": 0.00, "CRIPTOMOEDAS": 0.00},
+            "Moderado":    {"RENDA FIXA": 0.35, "IMOBILIÁRIO": 0.32, "MULTIMERCADO": 0.08, "AÇÕES BR": 0.10, "INTERNACIONAL": 0.10, "CRIPTOMOEDAS": 0.05},
+            "Agressivo":   {"RENDA FIXA": 0.10, "IMOBILIÁRIO": 0.20, "MULTIMERCADO": 0.05, "AÇÕES BR": 0.35, "INTERNACIONAL": 0.20, "CRIPTOMOEDAS": 0.10}
+        }
+    },
 
----
+    # -------------------------------------------------------------------------
+    # 2. REGRAS DE CÁLCULO E FLUXO DE DADOS (Business Rules)
+    # -------------------------------------------------------------------------
+    "business_rules": {
+        
+        "blended_rate_formula": {
+            "description": "Taxa de Retorno Ponderada da Carteira (ao mês).",
+            "formula": "Somatório de (Peso do Ativo * Retorno Mensal do Ativo)",
+            "conversion_to_monthly": "R_am = (1 + R_aa)^(1/12) - 1"
+        },
+        
+        "monthly_cash_flow": {
+            "description": "Extrato de Acúmulo Mensal (Mês a Mês).",
+            "step_1_aporte": "O usuário define o Salário (ex: R$ 2.000,00) e o Percentual de Poupança (ex: 30%), resultando no Aporte Mensal Base (ex: R$ 600,00).",
+            "step_2_rendimento_mes": "Rendimento do Mês = (Saldo Inicial + Aporte Mensal) * Taxa Mensal Ponderada do Perfil.",
+            "step_3_saldo_final": "Saldo Final do Mês = Saldo Inicial + Aporte Mensal + Rendimento do Mês."
+        },
+        
+        "long_term_projections": {
+            "description": "Projeções de Cenários de Longo Prazo (Anos).",
+            "horizons": [2, 5, 10, 20, 30],
+            "total_invested": "Aporte Mensal * Anos * 12 (Capital puro aportado pelo usuário)",
+            "future_value_patrimonio": "Função VF do Excel aplicada com a Taxa Ponderada Mensal, Prazo em Meses e Aporte."
+        },
+        
+        "asset_allocation": {
+            "description": "Distribuição do valor mensal aportado por classe de ativo.",
+            "methodology": "Busca dinâmica via PROCX cruzando [Perfil Selecionado] & '-' & [Tipo de Ativo] na base de dados, multiplicando o percentual resultante pelo Valor Total Investido no Mês."
+        }
+    },
 
-## 2. Workbook Structure (Sheets)
+    # -------------------------------------------------------------------------
+    # 3. ESTRUTURA VISUAL DA PLANILHA (UI / Layout Spec)
+    # -------------------------------------------------------------------------
+    "layout_specification": {
+        "sheet_1": "APP (Dashboard Interativo)",
+        "blocks_order": [
+            "Bloco 1: Configurações Globais (Salário, Rendimento Base, Sugestão 30%)",
+            "Bloco 2: Simulador de Aporte e Seleção de Perfil (Com Validação de Dados)",
+            "Bloco 3: Alocação de Ativos por Perfil (Tabela com PROCX e SOMA totalizadora)",
+            "Bloco 4: Projeções de Cenários de Longo Prazo (Tabela baseada no extrato e juros compostos)"
+        ],
+        "sheet_2": "Database_Profiles (Tabela de Apoio e Matriz de Dados de Ativos)"
+    }
+}
 
-### Sheet 1: `APP` (Dashboard & Interactive Interface)
-* **Purpose:** Main user control panel, input variables, scenario projections, and asset allocation breakdown.
-* **Key Sections & Layout:**
-  * **Global/Configuration Variables:**
-    * Salary / Base Income (`B10`)
-    * Portfolio Monthly Yield Rate / Dividend Yield (`B11`, e.g., `0.6%` or `0.006`)
-    * Suggested Investment Rule (`B12`, e.g., 30% of salary)
-  * **Monthly Investment Simulator (Inputs):**
-    * Monthly Contribution Amount (`B15`)
-    * Horizon in Years (`B16`)
-    * Monthly Interest Rate / Yield (`B17`)
-    * *Outputs (Formulas):* 
-      * Accumulated Capital (`B18`) -> Compound interest formula on monthly deposits.
-      * Monthly Dividends (`B19`) -> Accumulated Capital * Yield Rate.
-  * **Scenario Simulator Table (Time Horizons):**
-    * Columns: Years (`2`, `5`, `10`, `20`, `30`), Accumulated Value, Projected Monthly Dividends.
-  * **Profile Asset Allocation (FII Types):**
-    * Profile Selector (`B30`, values: `Conservador`, `Moderado`, `Agressivo`).
-    * Dynamic breakdown table pulling weights from the reference data based on the selected profile and calculating individual fund type budget allocations.
-
-### Sheet 2: `Database_Profiles` (Backend Reference Data)
-* **Purpose:** Stores the relational distribution rules mapping profiles to FII asset classes.
-* **Columns Structure:**
-  * `CHAVE` (Concatenation of Profile + FII Type, e.g., `Moderado-PAPEL`)
-  * `PERFIL` (Conservador, Moderado, Agressivo)
-  * `TIPO DE FII` (PAPEL, TIJOLO, HÍBRIDOS, FOFs, DESENVOLVIMENTO, HOTELARIAS)
-  * `%` (Target allocation weight, summing to 1.0 per profile)
-
----
-
-## 3. Business Rules & Formulas
-
-1. **Compound Interest & Growth Model:**
-   * The accumulated capital formula for regular monthly investments must use the future value formula considering monthly compounding.
-2. **Dynamic Asset Allocation:**
-   * The allocation table on the `APP` sheet must dynamically filter or look up weights from `Database_Profiles` using `XLOOKUP` or `FILTER` based on the active profile selected in cell `B30`.
-3. **Visual Uniformity & Design Standards:**
-   * Clean financial corporate layout (palette: Dark headers, soft gray gridlines, formatted currency `R$` and percentage `%` cells).
+if __name__ == "__main__":
+    print(f"Especificação carregada com sucesso para: {PROJECT_SPEC['name']}")
+    print(f"Arquitetura baseada em: {PROJECT_SPEC['architecture']}")
