@@ -49,7 +49,6 @@ O código foi totalmente desacoplado do modelo monolítico tradicional, sendo di
 * Utiliza a função financeira de Valor Futuro (`FV`) para projetar o acúmulo de patrimônio com juros compostos em horizontes de 2, 5, 10, 20 e 30 anos.
 
 ---
-
 ## 🚀 Processo de Construção e Execução
 
 ### Pré-requisitos
@@ -77,5 +76,5 @@ As fórmulas geradas pelo script utilizam o padrão internacional de engenharia 
 -----------------
 
 ---
-
+Dentro do processo de criação foram utilizadas Gemini como assistente para o processo de construção de arquivos. 
 ```
