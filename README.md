@@ -1,8 +1,21 @@
-```markdown
-# 📊 Simulador de Investimentos Multiclasse (Specification-Driven Modular Architecture)
 
-Simulador financeiro profissional desenvolvido em Python utilizando a biblioteca `openpyxl`, estruturado sob o conceito de desenvolvimento orientado a especificações (*Specification-Driven Development*). O projeto foi concebido e arquitetado em uma colaboração de engenharia de software entre o desenvolvedor e a inteligência artificial **Gemini**, garantindo modularidade, manutenibilidade e total compatibilidade nativa com o **Excel na Nuvem (Excel Online / Office 365 Web)**.
+# Simulador de Investimentos
 
+Este projeto automatiza a criação de relatórios financeiros, garantindo a integridade de fórmulas e visualização de dados.
+
+## Funcionalidades Recentes
+
+- **Dashboard Automatizado:** Geração de arquivos `.xlsx` com fórmulas nativas preservadas e gráficos (Barras e Linhas) integrados diretamente via `openpyxl`.
+- **Relatórios Executivos:** Geração automática de PDFs de alta resolução utilizando `matplotlib` para os três perfis de investidor:
+  - **Conservador**
+  - **Moderado**
+  - **Agressivo**
+- **Padronização:** Estrutura modular com classes de estilo e banco de dados isolado.
+
+## Como utilizar
+Basta executar o script principal:
+```bash
+python main.py
 ---
 
 ## 🛠️ Arquitetura do Projeto
